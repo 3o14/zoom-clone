@@ -17,4 +17,17 @@ const wss = new WebSocket.Server({server});
 // wss(Web Socket Serveer)
 
 // http 서버 위에 webSocket 서버를 만듬
+
+const sockets = [];
+
+wss.on("connection", (socket) => {
+    sockets.push(socket);
+    console.log("Connected to Browser ✅");
+
+    // 브라우저와의 연결이 끊길 경우 발생
+    socket.on("close", () => console.log("Disconnected from the Browser ❌"));
+    socket.on("message", (message) => {
+        sockets.forEach((aSocket) => aSocket.send(message.toString('utf8')));
+    });
+});
 server.listen(3000, handleListen);
