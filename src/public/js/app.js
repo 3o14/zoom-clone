@@ -9,7 +9,7 @@ function handleRoomSubmit(event) {
   socket.emit("enter_room", { payload: input.value }, () => {  // <-> webSocket : socket.send()
     console.log("server is done!");
     });
-    // emit(event, argument(object도 가능), (server에서 호출하는) function ) 
+    // emit(event, argument1, argument2, ...)
   input.value = "";
 }
 
