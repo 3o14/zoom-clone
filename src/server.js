@@ -32,25 +32,40 @@ function publicRooms() {
   return publicRooms;
 }
 
+// room 개수 세는 함수
+function countRoom(roomName) {
+  return wsServer.sockets.adapter.rooms.get(roomName)?.size;
+}
+
 wsServer.on("connection", (socket) => {
+  
+  // 닉네임
   socket["nickname"] = "Anon";
   socket.onAny((event) => {
     console.log(`Socket Event: ${event}`);
   });
+
+  // room 입장 시 알림
   socket.on("enter_room", (roomName, done) => {
     socket.join(roomName);
     done();
-    socket.to(roomName).emit("welcome", socket.nickname);
+    socket.to(roomName).emit("welcome", socket.nickname, countRoom(roomName));
     wsServer.sockets.emit("room_change", publicRooms());
   });
+
+  // room 퇴장 시 알림
   socket.on("disconnecting", () => {
     socket.rooms.forEach((room) =>
-      socket.to(room).emit("bye", socket.nickname)
+    socket.to(room).emit("bye", socket.nickname, countRoom(room) - 1)
     );
   });
+
+  // room 퇴장
   socket.on("disconnect", () => {
     wsServer.sockets.emit("room_change", publicRooms());
   });
+
+  // 채팅
   socket.on("new_message", (msg, room, done) => {
     socket.to(room).emit("new_message", `${socket.nickname}: ${msg}`);
     done();
